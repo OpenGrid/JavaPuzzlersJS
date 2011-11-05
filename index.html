@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+           
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+
+<html>
+    <head>
+        <title>Presentation</title>
+
+        <meta charset='utf-8'>
+        <script src='slides.js'></script>
+        <style>
+            /* Your individual styles here, or just use inline styles if that’s
+               what you want. */
+
+
+        </style>
+    </head>
+
+
+
+    <body style='display: none'>
+
+        <section class='slides layout-regular template-default'>
+
+            <!-- Your slides (<article>s) go here. Delete or comment out the
+                 slides below. -->
+
+
+
+            <!--<article class='biglogo'>
+            </article>      
+            -->
+
+            <article>
+                <h1>
+                    Java Puzzlers in JS
+                </h1>
+                
+                <p>
+                    Lech Wilczyński<br/><a href="http://twitter.com/#!DoctorLex">@DoctorLex</a>
+                </p>
+                
+                
+                <p>
+                    <a href="http://twitter.com/meetjs">meet.js</a> Nov 5, 2011
+                </p>
+                
+            </article>
+
+
+            <article class="smaller">
+                <q >I hate JS and I've always thought we'd eventually replace it with the GWT type model of using a strongly-typed, compiled language.
+                </q>
+                <div class='author'>
+                    Java programmer, Mark Faine <!-- https://plus.google.com/100821288659076872001/posts -->
+                </div>
+            </article>
+
+            <article>
+
+
+                <q>
+                    "It's always beneficial to detect programming errors as quickly as possible."
+                </q>
+                <div class='author'>
+                    Josh Bloch
+                </div>
+            </article>
+            <article>
+                <h3>
+                    Strong typing
+                </h3>
+                <p>
+                    Strong typing - Absence of unchecked run-time type errors.
+                </p>
+                <p>
+                    Strong typing catches many bugs, but it also makes you focus too much on getting the types right and not enough on getting the rest of the program correct.
+                </p>
+
+                <section class="build">
+                    <pre>
+int a = 5.6;
+int b = "4";  // Compile error
+int c = a + b;
+                    </pre>
+                </section>
+
+                <section  class="build">
+                    <pre>
+var a = 5.6;
+var b = "4";            
+var c = a + b // = 5.64
+                    </pre>
+                </section>
+
+            </article>
+
+            <article>
+                <h3>Problem 0.1</h3>
+                <pre>
+public class Main {
+	public static void main(String args[]){		
+		System.out.println(2.00 - 1.10);
+	}
+}
+                </pre>
+                <section class="build">
+                    <pre>
+/* 0.9
+   0.90
+   Warning
+   None of the above */
+                    </pre>    
+                </section>
+                <section class="build">
+                    <pre>
+// 0.8999999999999999
+                    </pre>    
+                </section>
+            </article>
+
+            <article>
+                <h3>Problem 0.1 in JavaScript</h3>
+                <pre>
+var change = 2.00 - 1.10;
+console.log(change);</pre>
+                <section class="build">
+                    <pre>0.8999999999999999 //same IEEE 754 standard</pre>
+                </section>
+
+                <section class="build">
+                    <p>solution?</p>
+                    <pre>
+var change = (2.00 - 1.10).toPrecision(2);
+var wallet = change + 1; 
+console.log(wallet); // WTF?
+                    </pre>
+                </section>
+                <section class="build">
+                    <pre>
+// 0.901?
+var wallet = +change + 1; // no strings attached</pre>
+                </section>
+
+
+
+            </article>
+
+            <article>
+                <h3>
+                    Problem 0.1
+                </h3>
+                <section>
+                <pre>
+import java.math.BigDecimal;
+public class Main {
+	public static void main(String args[]){
+		BigDecimal payment = new BigDecimal(2.00);
+		BigDecimal cost = new BigDecimal(1.10);
+		System.out.println(payment.subtract(cost));
+	}
+}
+</pre>
+                </section>
+                <section class="build">
+<pre>
+/* 1. 0.90
+   2. 0.9
+   3. 0.8999999999999999
+   4. None of the above */</pre>
+                </section>
+                <section class="build">     
+                    <pre>0.899999999999999911182158029987476766109466552734375</pre>
+                </section>          
+            </article>
+
+            <article>
+                <h3>
+                    Problem 0.1 in JavaScript
+                </h3>
+                <pre>
+// <a href="https://github.com/jhs/bigdecimal.js">github.com/jhs/bigdecimal.js</a>
+var payment = new BigDecimal(2.00);
+var cost = new BigDecimal(1.10);
+console.log(payment.subtract(cost));
+/* 1. 0.90
+   2. 0.9
+   3. 0.899999999999999911182158029987476766109466552734375
+   4. None of the above */
+                </pre>
+                <section class="build">     
+                    <pre>
+uncaught exception: BigDecimal()
+                    </pre>
+                </section>          
+            </article>
+
+
+            <article>
+                <h3>
+                    Problem 0.1 JavaScript fixed
+                </h3>
+                <pre>
+// <a href="https://github.com/jhs/bigdecimal.js">github.com/jhs/bigdecimal.js</a>
+var payment = new BigDecimal(2.00 + '');
+var cost = new BigDecimal(1.10 + '');
+console.log(payment.subtract(cost));
+                </pre>
+                <section class="build">     
+                    <pre>
+BigDecimal API in JS enforces proper parameters as strings
+                    </pre>
+                </section>
+                <section class="build">
+                    <p>Why don’t my numbers add up? <a href="http://floating-point-gui.de/">floating-point-gui.de</a></p>
+                </section>
+            </article>
+
+
+            <article>
+                <h3>
+                    RegEx problem
+                </h3>
+                <pre>
+import java.util.regex.*;
+public class Main {
+        public static void main(String[] args) {
+                Pattern p = Pattern.compile("(aa|aab?)+");
+                int count = 0;
+                for(String s = ""; s.length() &lt; 200; s += "a")
+                        if(p.matcher(s).matches()) count++;
+                System.out.println(count);
+        }
+}
+/* 1. 99
+   2. 100
+   3. 198
+   4. None of the above */
+                </pre>
+                <section class="build">     
+                    <pre>"Bagastrofic Cat Tracking"</pre>
+                    <!--<a href="http://ideone.com/xFsQA">Problem 2 on ideone</a>-->
+                </section>       
+            </article>
+
+            <article>
+                <h3>
+                    RegEx problem in JS
+                </h3>      
+                <section>
+                    <pre>
+var p = /(aa|aab?)+/;
+var count = 0, s;
+for(s = ""; s.length &lt; 200; s += "a") {
+  if(p.test(s) !== false) count++;
+}
+console.log(count);
+/* 1. 99
+   2. 100
+   3. 198
+   4. None of the above */
+                    </pre>
+                </section>
+
+                <section  class="build">
+                    <pre>
+198 // global is not implicit in Perl regular expressions
+                    </pre>
+                </section>     
+            </article>
+
+
+            <article>
+                <h3>
+                    RegEx problem in JS
+                </h3>      
+                <section>
+                    <pre>
+var p = /(aa|aab?)+/g;
+var count = 0, s;
+for(s = ""; s.length &lt; 200; s += "a") {
+  if(p.test(s) !== false) count++;
+}
+console.log(count);
+/* 1. 99
+   2. 100
+   3. 198
+   4. None of the above */
+                    </pre>
+                </section>
+
+                <section class="build">
+                    <pre>
+99 // No catastrophic backtracking
+                    </pre>
+                </section>     
+            </article>
+
+
+            <article>
+                <h3>Elementary problem</h3>
+
+                <section>
+                    <pre>
+public class Main {
+	public static void main(String[] args) {
+		System.out.print(12345 + 5432l);
+		System.out.print(" ");
+		System.out.print(01234 + 43210);
+	}
+}
+                    </pre>
+                </section>    
+                <section class="build">
+                    <pre>
+17777 44444
+17777 43878
+66666 44444
+66666 43878
+                    </pre>
+                </section>     
+                <section class="build">
+                    
+                    <pre>
+17777 43878
+                    </pre>
+                </section>    
+            </article>
+
+
+            <article>
+                <h3>Elementary problem in JavaScript</h3>
+
+                <section>
+                    <pre>
+console.log(12345 + 5432l);
+console.log(01234 + 43210);
+                    </pre>
+                </section>    
+                <section class="build">
+                    <pre>
+/* 17777 44444
+   17777 43878
+   Error
+   None of the above */</pre>
+                </section>        
+                <section class="build">
+                    <pre>
+identifier starts immediately after numeric literal
+                    </pre>
+                </section>        
+            </article>
+
+            <article>
+                <h3>
+                    Long problem
+                </h3>
+                <section>
+                    <pre>     
+public class Main {
+    public static void main(String[] args) {
+        final long MICROS_PER_DAY = 24 * 60 * 60 * 1000 * 1000;
+        final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+        System.out.println(MICROS_PER_DAY / MILLIS_PER_DAY);
+    }
+}</pre>
+                </section>        
+               <section class="build">
+                    <pre>
+/* 5
+   1000
+   Compile error
+   None of the above */</pre>                    
+                </section>
+                <section class="build">
+                    <pre>5</pre>                    
+                </section>
+            </article>
+            <article>
+                <h3>
+                    Long problem in JavaScript
+                </h3>
+                <section>
+                    <pre>     
+var MICROS_PER_DAY = 24 * 60 * 60 * 1000 * 1000;
+var MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+console.log(MICROS_PER_DAY / MILLIS_PER_DAY);</pre>
+                </section>      
+                <section class="build">
+                    <pre>
+/* 5
+   1000
+   Infinity
+   None of the above */
+                    </pre>                    
+                </section>
+                <section class="build">
+                    <pre>1000</pre>                    
+                </section>
+            </article>  
+
+
+
+            <article>
+                <h3>
+                    Thank you!
+                </h3>
+
+                <ul>
+                    <li><a href="http://www.youtube.com/watch?v=wbp-3BJWsU8">YT: Java Puzzlers @Google I/O</a></li>
+                    <li>
+                        <a href="http://www.amazon.co.uk/gp/product/032133678X/ref=as_li_qf_sp_asin_tl?ie=UTF8&tag=dr0e-21&linkCode=as2&camp=1634&creative=6738&creativeASIN=032133678X">Java Puzzlers: Traps, Pitfalls, and Corner Cases</a><img src="http://www.assoc-amazon.co.uk/e/ir?t=dr0e-21&l=as2&o=2&a=032133678X" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
+                    </li>
+                    <li><a href="http://amzn.to/smoFxQ">Mastering regular expressions</a></li>
+                    <li>
+                        <a href='http://download.oracle.com/docs/cd/E19957-01/806-3568/ncg_goldberg.html'>What Every Computer Scientist Should Know About Floating-Point Arithmetic</a></li>
+                    
+                </ul>
+            </article>
+
+        </section>
+
+    </body>
+</html>
